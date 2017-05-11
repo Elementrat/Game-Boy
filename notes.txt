@@ -1,0 +1,20 @@
+tsc --lib es6 --outDir build .\server.ts -w
+
+https://sourceforge.net/p/discord/wiki/markdown_syntax/
+
+  if (message.content.startsWith('ping')) {
+
+    for(var x of message.mentions.users.array()){  
+     message.channel.send(x.username)
+    }
+
+    message.channel.send('wab') 
+  }
+
+
+  leaderboard
+  score <name>
+  play <game>
+    join
+    start
+    players
