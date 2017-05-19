@@ -8,8 +8,7 @@ To get set up,
 * "npm install nodemon -g"
 * "npm install typescript -g"
 
-Then, to dev,
-To get compilation going with auto-compile on code-change: 
+Then, to dev with auto-compile on code-change
 * tsc --lib es6 --outDir build .\server.ts -w
 
 Then, to serve (with auto-update when code changes)
