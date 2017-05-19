@@ -6,6 +6,11 @@ import { DBManager, DBResponseCode } from "./db"
 
 import { Secrets } from "./secrets"
 
+let thugs = new Map<string, string>()
+thugs.set("tej", "192841484939165696")
+thugs.set("gameboy","313847241557409792")
+thugs.set("haxo", "178326606283145217")
+
 const client = new Discord.Client();
 
 var utils = new Utils();
@@ -136,11 +141,28 @@ client.on('message', message => {
   let mentions = message.mentions
   var content = message.content
 
+  if(author.id == thugs.get("gameboy"))
+    return
+  
+  if(author.id == thugs.get("haxo")){
 
-  //THIS IS A MESSAGE FROM TEJ
-  if(author.id == "192841484939165696"){
-      
   }
+
+  if(author.id == thugs.get("tej")){
+
+    var tejMoj = message.guild.emojis.array()
+    tejMoj = tejMoj.filter(function(emoj){
+      return emoj.name == 'tej'
+    })
+
+    //the tej react exists on this server
+    if(tejMoj.length != 0){
+      var tejReact = tejMoj[0]
+      message.react(tejReact)
+    }
+
+  }
+
 
   for (var mention of mentions.users.array()){
 

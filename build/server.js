@@ -6,6 +6,10 @@ var games_1 = require("./games");
 var leaderboard_1 = require("./leaderboard");
 var db_1 = require("./db");
 var secrets_1 = require("./secrets");
+var thugs = new Map();
+thugs.set("tej", "192841484939165696");
+thugs.set("gameboy", "313847241557409792");
+thugs.set("haxo", "178326606283145217");
 var client = new Discord.Client();
 var utils = new utils_1.Utils();
 var botPrefix = ".";
@@ -109,8 +113,20 @@ client.on('message', function (message) {
     var author = message.author;
     var mentions = message.mentions;
     var content = message.content;
-    //THIS IS A MESSAGE FROM TEJ
-    if (author.id == "192841484939165696") {
+    if (author.id == thugs.get("gameboy"))
+        return;
+    if (author.id == thugs.get("haxo")) {
+    }
+    if (author.id == thugs.get("tej")) {
+        var tejMoj = message.guild.emojis.array();
+        tejMoj = tejMoj.filter(function (emoj) {
+            return emoj.name == 'tej';
+        });
+        //the tej react exists on this server
+        if (tejMoj.length != 0) {
+            var tejReact = tejMoj[0];
+            message.react(tejReact);
+        }
     }
     for (var _i = 0, _a = mentions.users.array(); _i < _a.length; _i++) {
         var mention = _a[_i];
