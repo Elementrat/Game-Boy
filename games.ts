@@ -1,6 +1,14 @@
 import Discord = require('discord.js');
-import { Formatter, ResponseCode } from "./utils"
-var f = new Formatter()
+import { Utils, ResponseCode } from "./utils"
+
+var utils = new Utils()
+
+export class Root{
+    name:string
+    constructor(){
+        this.name = "Default"
+    }
+}
 
 export class Role {
     name : string
@@ -13,18 +21,26 @@ export class GameManager {
 
     constructor() {
         this.gameTemplates = new Map<String, GameTemplate>()
-        this.gameTemplates.set("Red-Card", new RedCardTemplate())
-        this.gameTemplates.set("Mystery", new MysteryTemplate())
-        this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
+        //console.log(s)
+
+        //this.gameTemplates.set("Red-Card", new RedFlagsTemplate())
+        this.gameTemplates.set("tej", new TejTemplate())
+       // this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
         this.gameInstances = new Map<Discord.Channel,GameInstance>()
     }
 
-    public describeGames(): string {
-        var str = ""
-        this.gameTemplates.forEach(function (e) {
-            str += f.pad_r(e.name, " ") + "  " + e.description + "\n"
+    public describeGames(): Discord.RichEmbed {
+        var e = new Discord.RichEmbed({color : utils.colors.get("theme")})
+
+        if(this.gameTemplates.size == 0){
+            e.addField("I don't know how to play anything", "I'm sorry. I feel like a failure")
+        }
+
+        this.gameTemplates.forEach(function (template) {
+            e.addField(template.name, template.description, false);
         })
-        return str
+
+        return e
     }
 
     public describeRoster(channel){
@@ -73,7 +89,10 @@ export class GameManager {
         }      
     }
 
-    create(channel, gameType) : ResponseCode{
+    create(channel, gameType:string) : ResponseCode{
+
+        gameType = gameType.toLowerCase()
+
         if(this.gameInstances.get(channel)){
             return ResponseCode.ERR_CHANNEL_ALREADY_HAS_GAME
         }
@@ -84,7 +103,7 @@ export class GameManager {
                 return ResponseCode.ERR_GAME_TEMPLATE_DOESNT_EXIST
             }
 
-            this.gameInstances.set(channel, this.gameTemplates.get(gameType).create());
+            this.gameInstances.set(channel, this.gameTemplates.get(gameType).create(channel));
             return ResponseCode.SUCCESS
         }
         
@@ -97,66 +116,32 @@ export class GameTemplate {
     public minPlayers : number
     public rules : string
     public roles : Array<Role>
+    public requiresExplicitJoin :boolean
+    public requiresVoice :boolean
 
     public constructor(){
         this.roles = new Array<Role>();
     }
 
-    public create() : GameInstance{
+    public create(channel) : GameInstance{
         return null
-    }
-}
-
-export class RedCardTemplate extends GameTemplate {
-    public perks: Array<string>
-    public redFlags: Array<String>
-
-    constructor() {
-        super()
-        this.name = "Red-Card"
-        this.rules = "Try to ruin the hosts date"
-        this.roles = [
-            { name : "The Single", description : "" },
-            { name : "The Dates", description : "" }
-        ]
-
-        this.description = "Try to ruin your friends ideal dates"
-        this.perks = ["tick", "tock", "zick", "zook", "zonk"]
-        this.redFlags = ["wot", "woot", "wit", "wzt"]
-        this.minPlayers = 1
-    }
-
-    create() {
-        return new RedCardInstance(this);
-    }
-}
-
-export class MysteryTemplate extends GameTemplate {
-    constructor() {
-        super()
-        this.name = "Mystery"
-        this.description = "A test game (Not Implemented)"
-    }
-}
-
-export class CardsAgainstTemplate extends GameTemplate {
-    constructor() {
-        super()
-        this.name = "Cards Against"
-        this.description = "You already know what this is (Not Implemented)"
     }
 }
 
 export class GameInstance {
     public players: Array<Discord.User>
-    public channel: Discord.GuildChannel
-    public currentRoud : Number
-    public numRounds: Number
+    public channel: any
+    public currentRound : number
+    public numRounds: number
     public gameTemplate: GameTemplate
     public started : boolean
-
+    
     start() {
         this.started = true
+    }
+
+    onPublicMessage(inputSequence, message, channel, author){
+
     }
 
     join(user : Discord.User) : ResponseCode{
@@ -176,8 +161,5 @@ export class GameInstance {
     }
 }
 
-export class RedCardInstance extends GameInstance {
-    start() {
-
-    }
-}
+import {RedFlagsInstance, RedFlagsTemplate} from "./redflags"
+import {TejInstance, TejTemplate} from "./tej"

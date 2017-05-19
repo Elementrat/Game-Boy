@@ -1,5 +1,5 @@
-import { Formatter } from "./utils"
-var f = new Formatter()
+import { Utils } from "./utils"
+var utils = new Utils()
 
 export class LeaderboardManager{
     public leaderboard: Map<String, Number>;
@@ -21,7 +21,7 @@ export class LeaderboardManager{
            str += "No scores have been recorded yet."
         }
         this.leaderboard.forEach((score: Number, user: String) => {
-            str += f.pad_r(user, " ") + " " + score + "\n"
+            str += utils.pad_r(user, " ") + " " + score + "\n"
         });
 
         return str

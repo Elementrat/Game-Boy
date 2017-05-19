@@ -1,12 +1,14 @@
 import Discord = require('discord.js');
-import { Formatter, ResponseCode } from "./utils";
-import { GameTemplate, GameManager, GameInstance, RedCardTemplate, MysteryTemplate } from "./games"
+import { Utils, ResponseCode } from "./utils";
+import { GameTemplate, GameManager, GameInstance} from "./games"
 import { LeaderboardManager } from "./leaderboard"
+import { DBManager, DBResponseCode } from "./db"
 
-const botToken = 'MzExMjI0MjU4NjcwMTAwNDgw.C_Ouxg.QF_4D6kWXVFL-sHyZnZpbxXAOM8';
+import { Secrets } from "./secrets"
+
 const client = new Discord.Client();
 
-var f = new Formatter();
+var utils = new Utils();
 var botPrefix = "."
 
 class Server {
@@ -19,43 +21,82 @@ class Server {
 }
 
 let me = new Server();
+let db = new DBManager()
 
 client.on('ready', () => {
   console.log('I am ready and listening!');
 });
 
-client.on('message', message => {
-  let str = ""
 
-  let channel = message.channel
-  let author = message.author
-  let mentions = message.mentions
-  var content = message.content
+let saveTejQuote = function(inputSequence, message : Discord.Message, author : Discord.User, truthiness){
+  console.log('try 2 sav')
+  var cmd = truthiness ? ".realtej " : ".faketej "
 
-  if (!content.startsWith(botPrefix)) {
-    return;
+  if(!inputSequence[1]){
+    author.send("I need the quote too! Use the format `" + cmd + "<quote>`")
+    return
   }
 
-  content = content.replace(botPrefix, "")
+  let quoteText = message.content.replace(cmd, "")
 
-  var inputSequence = content.split(" ").filter(function (elm) {
-    return elm != " "
+  db.saveTejQuote(quoteText, author.username, truthiness, function(status, results){
+    if(status == DBResponseCode.ERR){
+      author.send("Sorry, had an issue saving that one. I have memory problems. And hearing problems. And just a lot of problems. Blame Haxo.")
+      return
+    }
+    
+    author.send("Successfully saved \"" + quoteText + "\" to the TejDB")
   })
+  
+}
 
-  switch (inputSequence[0]) {
+let commands = {
 
-    case "score":
-      if (!inputSequence[1] || mentions.users.size == 0) {
-        channel.send("To grant points, say `score @username`")
-        return
+  leaderboard : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
+      channel.send(utils.code(me.leaderboardManager.describeScoreboard()))
+  },
+
+  realtej: function(inputSequence,message : Discord.Message, author : Discord.User, channel){
+      saveTejQuote(inputSequence, message, author, true)
+  },
+
+  faketej: function(inputSequence, message : Discord.Message, author : Discord.User, channel){
+    saveTejQuote(inputSequence, message, author, false)
+  },
+
+  play : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
+    let str = ""
+      if (!inputSequence[1]) {
+        str += "Here are the games I know:"
+        channel.send(str)
+        channel.sendEmbed(me.gameManager.describeGames())
+        channel.send("To initiate a game, say `.play <gamename>` \n")
       }
+      else {
+        var gameType = inputSequence[1];
+        let result = me.gameManager.create(channel, gameType)
 
-      me.leaderboardManager.grantPoints(mentions.users.first().username, 1)
-      break;
+        if (result == ResponseCode.SUCCESS) {
 
-    case "end":
+          
+        var game = me.gameManager.gameInChannel(channel);
+        if(game.gameTemplate.requiresExplicitJoin){
 
-    var game = me.gameManager.gameInChannel(channel);
+          str = ""
+          str += "**Alright, let's play " + gameType + "!** \n"
+          str += "Waiting for players. To join, say `.join` \n"
+          str += "When everyone is in, say `.start` to begin the game"
+          channel.send(str)
+        }
+        }
+        if(result == ResponseCode.ERR_CHANNEL_ALREADY_HAS_GAME){
+          channel.send("Sorry, there's already a game running in this channel. Say `.end` to kill it!")
+        }
+      }
+  },
+
+  end : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
+      var game = me.gameManager.gameInChannel(channel);
       if (game) {
         me.gameManager.endGame(channel)
         message.channel.send("Game ended.")
@@ -63,15 +104,15 @@ client.on('message', message => {
       else{
         message.channel.send("You'll need to start a game before you can end it. ;)")
       }
-    break;
+  },
 
-    case "start":
+  join : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
     var game = me.gameManager.gameInChannel(channel)
       if (game) {
         let result = me.gameManager.startGame(channel);
         if (result == ResponseCode.SUCCESS) {
           let str = "Started Game. Here are the rules. \n"
-          str += f.code(game.gameTemplate.rules)
+          str += utils.code(game.gameTemplate.rules)
           channel.send(str);
         }
         if (result == ResponseCode.ERR_NOT_ENOUGH_PLAYERS) {
@@ -83,59 +124,53 @@ client.on('message', message => {
       else {
         channel.send("Sorry, you'll need to create a game with `.play <game name>` before you can start!")
       }
-      break;
-
-    case "join":
-      let result = me.gameManager.addPlayerToGame(channel, author)
-      
-      if (result == ResponseCode.SUCCESS) {
-
-        channel.send(author.username + " joined the game!")
-        let game = me.gameManager.gameInChannel(channel)
-
-        channel.send("Current players: " + " (" + game.gameTemplate.minPlayers + " total needed)")
-        channel.send(f.code(me.gameManager.describeRoster(channel)))
-        channel.send("Say `.start` to begin the game.")
-      }
-      if (result == ResponseCode.ERR_GAME_INSTANCE_DOESNT_EXIST) {
-        channel.send("You'll need to get a game going with `.play` before you can join!")
-      }
-      if(result == ResponseCode.ERR_PLAYER_ALREADY_JOINED){
-        channel.send("You're already in the game, "+ author.username+"!")
-      }
-      if (result == ResponseCode.ERR_GAME_ALREADY_STARTED) {
-        channel.send("Sorry, you can't join a game in-progress")
-      }
-      break;
-
-    case "play":
-      if (!inputSequence[1]) {
-        str += "To initiate a game, say `.play <gamename>` \n"
-        str += "Here are the games I know how to run:"
-        channel.send(str)
-        channel.send(f.code(me.gameManager.describeGames()))
-      }
-      else {
-        var gameType = inputSequence[1];
-        let result = me.gameManager.create(channel, gameType)
-
-        if (result == ResponseCode.SUCCESS) {
-          str = ""
-          str += "**Alright, let's play " + gameType + "!** \n"
-          str += "Waiting for players. To join, say `.join` \n"
-          str += "When everyone is in, say `.start` to begin the game"
-          channel.send(str)
-        }
-        if(result == ResponseCode.ERR_CHANNEL_ALREADY_HAS_GAME){
-          channel.send("Sorry, there's already a game running in this channel. Say `.end` to kill it!")
-        }
-      }
-      break;
-
-    case "leaderboard":
-      channel.send(f.code(me.leaderboardManager.describeScoreboard()))
-      break;
   }
+}
+
+
+client.on('message', message => {
+  let str = ""
+
+  let channel = message.channel
+  let author = message.author
+  let mentions = message.mentions
+  var content = message.content
+
+
+  //THIS IS A MESSAGE FROM TEJ
+  if(author.id == "192841484939165696"){
+      
+  }
+
+  for (var mention of mentions.users.array()){
+
+    //THIS MESSAGE MENTIONS TEJ
+    if(mention.username == "192841484939165696"){
+
+    }
+  }
+
+
+  if (!content.startsWith(botPrefix)) {
+    return;
+  }
+
+  content = content.replace(botPrefix, "")
+
+  var g = me.gameManager.gameInChannel(message.channel);
+
+  if(g){
+      g.onPublicMessage(inputSequence, message, channel, author)
+  }
+  
+  var inputSequence = content.split(" ").filter(function (elm) {
+    return elm != " "
+  })
+
+  if(commands[inputSequence[0]]){
+    commands[inputSequence[0]](inputSequence, message, author, channel)
+  }
+  
 });
 
-client.login(botToken);
+client.login(Secrets.botToken);

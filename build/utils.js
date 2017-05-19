@@ -12,19 +12,40 @@ var ResponseCode;
     ResponseCode[ResponseCode["ERR_NOT_ENOUGH_PLAYERS"] = 7] = "ERR_NOT_ENOUGH_PLAYERS";
     ResponseCode[ResponseCode["ERR_GAME_ALREADY_STARTED"] = 8] = "ERR_GAME_ALREADY_STARTED";
 })(ResponseCode = exports.ResponseCode || (exports.ResponseCode = {}));
-var Formatter = (function () {
-    function Formatter() {
+var Utils = (function () {
+    function Utils() {
         this.padLength = 14;
+        this.botPrefix = ".";
+        this.colors = new Map();
+        this.colors.set("theme", 0x00FF00);
+        this.colors.set("tej", 0xEB1D89);
+        this.delays = new Map();
+        this.delays.set("short", 2000);
+        this.delays.set("medium", 4000);
     }
-    Formatter.prototype.code = function (string) {
+    Utils.prototype.shuffle = function (array) {
+        var currentIndex = array.length, temporaryValue, randomIndex;
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            // And swap it with the current element.
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+        return array;
+    };
+    Utils.prototype.code = function (string) {
         return "```" + string + "```";
     };
-    Formatter.prototype.bold = function (string) {
+    Utils.prototype.bold = function (string) {
         return "**" + string + "**";
     };
     // right padding s with c to a total of n chars taken from 
     //https://eureka.ykyuen.info/2011/08/23/javascript-leftright-pad-a-string/
-    Formatter.prototype.pad_r = function (s, c) {
+    Utils.prototype.pad_r = function (s, c) {
         if (!s || !c || s.length >= this.padLength) {
             return s;
         }
@@ -34,6 +55,6 @@ var Formatter = (function () {
         }
         return s;
     };
-    return Formatter;
+    return Utils;
 }());
-exports.Formatter = Formatter;
+exports.Utils = Utils;

@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 var utils_1 = require("./utils");
-var f = new utils_1.Formatter();
+var utils = new utils_1.Utils();
 var LeaderboardManager = (function () {
     function LeaderboardManager() {
         this.leaderboard = new Map();
@@ -17,7 +17,7 @@ var LeaderboardManager = (function () {
             str += "No scores have been recorded yet.";
         }
         this.leaderboard.forEach(function (score, user) {
-            str += f.pad_r(user, " ") + " " + score + "\n";
+            str += utils.pad_r(user, " ") + " " + score + "\n";
         });
         return str;
     };

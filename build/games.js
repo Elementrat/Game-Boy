@@ -1,17 +1,15 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 exports.__esModule = true;
+var Discord = require("discord.js");
 var utils_1 = require("./utils");
-var f = new utils_1.Formatter();
+var utils = new utils_1.Utils();
+var Root = (function () {
+    function Root() {
+        this.name = "Default";
+    }
+    return Root;
+}());
+exports.Root = Root;
 var Role = (function () {
     function Role() {
     }
@@ -21,17 +19,21 @@ exports.Role = Role;
 var GameManager = (function () {
     function GameManager() {
         this.gameTemplates = new Map();
-        this.gameTemplates.set("Red-Card", new RedCardTemplate());
-        this.gameTemplates.set("Mystery", new MysteryTemplate());
-        this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate());
+        //console.log(s)
+        //this.gameTemplates.set("Red-Card", new RedFlagsTemplate())
+        this.gameTemplates.set("tej", new tej_1.TejTemplate());
+        // this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
         this.gameInstances = new Map();
     }
     GameManager.prototype.describeGames = function () {
-        var str = "";
-        this.gameTemplates.forEach(function (e) {
-            str += f.pad_r(e.name, " ") + "  " + e.description + "\n";
+        var e = new Discord.RichEmbed({ color: utils.colors.get("theme") });
+        if (this.gameTemplates.size == 0) {
+            e.addField("I don't know how to play anything", "I'm sorry. I feel like a failure");
+        }
+        this.gameTemplates.forEach(function (template) {
+            e.addField(template.name, template.description, false);
         });
-        return str;
+        return e;
     };
     GameManager.prototype.describeRoster = function (channel) {
         var str = "";
@@ -72,6 +74,7 @@ var GameManager = (function () {
         }
     };
     GameManager.prototype.create = function (channel, gameType) {
+        gameType = gameType.toLowerCase();
         if (this.gameInstances.get(channel)) {
             return utils_1.ResponseCode.ERR_CHANNEL_ALREADY_HAS_GAME;
         }
@@ -80,7 +83,7 @@ var GameManager = (function () {
             if (!gameTemplate) {
                 return utils_1.ResponseCode.ERR_GAME_TEMPLATE_DOESNT_EXIST;
             }
-            this.gameInstances.set(channel, this.gameTemplates.get(gameType).create());
+            this.gameInstances.set(channel, this.gameTemplates.get(gameType).create(channel));
             return utils_1.ResponseCode.SUCCESS;
         }
     };
@@ -91,56 +94,12 @@ var GameTemplate = (function () {
     function GameTemplate() {
         this.roles = new Array();
     }
-    GameTemplate.prototype.create = function () {
+    GameTemplate.prototype.create = function (channel) {
         return null;
     };
     return GameTemplate;
 }());
 exports.GameTemplate = GameTemplate;
-var RedCardTemplate = (function (_super) {
-    __extends(RedCardTemplate, _super);
-    function RedCardTemplate() {
-        var _this = _super.call(this) || this;
-        _this.name = "Red-Card";
-        _this.rules = "Try to ruin the hosts date";
-        _this.roles = [
-            { name: "The Single", description: "" },
-            { name: "The Dates", description: "" }
-        ];
-        _this.description = "Try to ruin your friends ideal dates";
-        _this.perks = ["tick", "tock", "zick", "zook", "zonk"];
-        _this.redFlags = ["wot", "woot", "wit", "wzt"];
-        _this.minPlayers = 1;
-        return _this;
-    }
-    RedCardTemplate.prototype.create = function () {
-        return new RedCardInstance(this);
-    };
-    return RedCardTemplate;
-}(GameTemplate));
-exports.RedCardTemplate = RedCardTemplate;
-var MysteryTemplate = (function (_super) {
-    __extends(MysteryTemplate, _super);
-    function MysteryTemplate() {
-        var _this = _super.call(this) || this;
-        _this.name = "Mystery";
-        _this.description = "A test game (Not Implemented)";
-        return _this;
-    }
-    return MysteryTemplate;
-}(GameTemplate));
-exports.MysteryTemplate = MysteryTemplate;
-var CardsAgainstTemplate = (function (_super) {
-    __extends(CardsAgainstTemplate, _super);
-    function CardsAgainstTemplate() {
-        var _this = _super.call(this) || this;
-        _this.name = "Cards Against";
-        _this.description = "You already know what this is (Not Implemented)";
-        return _this;
-    }
-    return CardsAgainstTemplate;
-}(GameTemplate));
-exports.CardsAgainstTemplate = CardsAgainstTemplate;
 var GameInstance = (function () {
     function GameInstance(template) {
         this.gameTemplate = template;
@@ -149,6 +108,8 @@ var GameInstance = (function () {
     }
     GameInstance.prototype.start = function () {
         this.started = true;
+    };
+    GameInstance.prototype.onPublicMessage = function (inputSequence, message, channel, author) {
     };
     GameInstance.prototype.join = function (user) {
         if (this.players.indexOf(user) == -1) {
@@ -162,13 +123,4 @@ var GameInstance = (function () {
     return GameInstance;
 }());
 exports.GameInstance = GameInstance;
-var RedCardInstance = (function (_super) {
-    __extends(RedCardInstance, _super);
-    function RedCardInstance() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    RedCardInstance.prototype.start = function () {
-    };
-    return RedCardInstance;
-}(GameInstance));
-exports.RedCardInstance = RedCardInstance;
+var tej_1 = require("./tej");
