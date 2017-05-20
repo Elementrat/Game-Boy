@@ -1,5 +1,14 @@
 import { Utils } from "./utils"
-var utils = new Utils()
+import Discord = require("discord.js")
+
+export class Scoreboard{
+    gameName:string
+    scores:Map<Discord.User, number>
+
+    constructor(){
+        this.scores = new Map<Discord.User, number>()
+    }
+}
 
 export class LeaderboardManager{
     public leaderboard: Map<String, Number>;
@@ -21,7 +30,7 @@ export class LeaderboardManager{
            str += "No scores have been recorded yet."
         }
         this.leaderboard.forEach((score: Number, user: String) => {
-            str += utils.pad_r(user, " ") + " " + score + "\n"
+            str += Utils.pad_r(user, " ") + " " + score + "\n"
         });
 
         return str

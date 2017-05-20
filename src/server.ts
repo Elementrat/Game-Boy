@@ -1,19 +1,19 @@
 import Discord = require('discord.js');
 import { Utils, ResponseCode } from "./utils";
 import { GameTemplate, GameManager, GameInstance} from "./games"
-import { LeaderboardManager } from "./leaderboard"
+import { LeaderboardManager, Scoreboard } from "./stats"
 import { DBManager, DBResponseCode } from "./db"
 
 import { Secrets } from "./secrets"
 
 let thugs = new Map<string, string>()
+
 thugs.set("tej", "192841484939165696")
 thugs.set("gameboy","313847241557409792")
 thugs.set("haxo", "178326606283145217")
 
 const client = new Discord.Client();
 
-var utils = new Utils();
 var botPrefix = "."
 
 class Server {
@@ -58,7 +58,7 @@ let saveTejQuote = function(inputSequence, message : Discord.Message, author : D
 let commands = {
 
   leaderboard : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
-      channel.send(utils.code(me.leaderboardManager.describeScoreboard()))
+      channel.send(Utils.code(me.leaderboardManager.describeScoreboard()))
   },
 
   realtej: function(inputSequence,message : Discord.Message, author : Discord.User, channel){
@@ -111,13 +111,21 @@ let commands = {
       }
   },
 
+  start : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
+    var game = me.gameManager.gameInChannel(channel)
+    if(game){
+      let status = me.gameManager.startGame(channel)
+      //if(status == ResponseCode.SUCCESS
+    }
+  },
+
   join : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
     var game = me.gameManager.gameInChannel(channel)
       if (game) {
         let result = me.gameManager.startGame(channel);
         if (result == ResponseCode.SUCCESS) {
           let str = "Started Game. Here are the rules. \n"
-          str += utils.code(game.gameTemplate.rules)
+          str += Utils.code(game.gameTemplate.rules)
           channel.send(str);
         }
         if (result == ResponseCode.ERR_NOT_ENOUGH_PLAYERS) {
@@ -151,6 +159,8 @@ client.on('message', message => {
   if(author.id == thugs.get("tej")){
 
     var tejMoj = message.guild.emojis.array()
+    //var hunned = "💯"
+
     tejMoj = tejMoj.filter(function(emoj){
       return emoj.name == 'tej'
     })
@@ -158,20 +168,24 @@ client.on('message', message => {
     //the tej react exists on this server
     if(tejMoj.length != 0){
       var tejReact = tejMoj[0]
-      message.react(tejReact)
+
+      //Give it the tej react based on a 1/10 chance
+      var rand = Math.random();
+      
+      console.log(rand)
+      if (rand < .1){
+        message.react(tejReact)
+      }
     }
-
   }
-
 
   for (var mention of mentions.users.array()){
 
     //THIS MESSAGE MENTIONS TEJ
-    if(mention.username == "192841484939165696"){
+    if(mention.id == thugs.get("tej")){
 
     }
   }
-
 
   if (!content.startsWith(botPrefix)) {
     return;

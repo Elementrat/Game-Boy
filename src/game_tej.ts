@@ -3,8 +3,6 @@ import { Utils, ResponseCode} from "./utils"
 import { DBManager , DBResponseCode} from "./db"
 import Discord = require("discord.js")
 
-var utils = new Utils()
-
 export class TejQuote{
     real:number // Number because SQLIte uses 0/1 Numbers as Bools
     author:string
@@ -78,7 +76,7 @@ export class TejInstance extends GameInstance{
         this.currentRound+= 1;
 
         if (this.currentRound == 1) {
-            var e = new Discord.RichEmbed({ color: utils.colors.get("tej") });
+            var e = new Discord.RichEmbed({ color: Utils.colors.get("tej") });
             this.channel.send("Brace yourself: You have entered the *TejZone*\n");
 
             var str = "";
@@ -91,16 +89,16 @@ export class TejInstance extends GameInstance{
         this.currentQuote = this.quoteDeck.pop();
         var me = this;
         setTimeout(function () {
-            me.channel.send("**Tej Quote #" + me.currentRound + ":** " + utils.code("\"" + me.currentQuote.quote + "\"")).then(function (msg) {
+            me.channel.send("**Tej Quote #" + me.currentRound + ":** " + Utils.code("\"" + me.currentQuote.quote + "\"")).then(function (msg) {
                 me.quoteMsg = msg;
                 me.reacCollector = new Discord.ReactionCollector(msg, function (reac) { return true; });
                 me.tejState = TejState.OMG_AWAITING_REACS;
 
                 setTimeout(function(){
                     me.channel.send("When guesses are in, say `.reveal` ");
-                }, utils.delays.get("short"))
+                }, Utils.delays.get("short"))
             });
-        }, utils.delays.get("medium"));
+        }, Utils.delays.get("medium"));
     }
 
     public drawDeck(callback){
@@ -117,13 +115,13 @@ export class TejInstance extends GameInstance{
                 q.quote = quotes[x].quote;
                 arr.push(q);
             }
-            arr = utils.shuffle(arr);
+            arr = Utils.shuffle(arr);
             callback(ResponseCode.SUCCESS, arr);
         });
     }
 
     public onPublicMessage(inputSequence, message, channel, author){
-        message.content = message.content.replace(utils.botPrefix, "");
+        message.content = message.content.replace(Utils.botPrefix, "");
         switch (message.content) {
             case "more":
                 if (this.tejState == TejState.OMG_POST_ROUND) {
@@ -133,7 +131,7 @@ export class TejInstance extends GameInstance{
             case "reveal":
                 if (this.tejState == TejState.OMG_AWAITING_REACS) {
                     var reacs = this.reacCollector.collected.array();
-                    var e = new Discord.RichEmbed({ color: utils.colors.get("tej") });
+                    var e = new Discord.RichEmbed({ color: Utils.colors.get("tej") });
                     var me = this;
                     for (var _i = 0, reacs_1 = reacs; _i < reacs_1.length; _i++) {
                         var reac = reacs_1[_i];
@@ -166,7 +164,7 @@ export class TejInstance extends GameInstance{
                         me.channel.send("That quote was added by " + me.currentQuote.author);
                         me.channel.send("Say `.more` for another, or `.end` to finish.");
                         me.tejState = TejState.OMG_POST_ROUND;
-                    }, utils.delays.get("short"));
+                    }, Utils.delays.get("short"));
                 }
                 break;
         }

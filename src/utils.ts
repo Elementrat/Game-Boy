@@ -11,24 +11,21 @@ export enum ResponseCode{
 }
 
 export class Utils{
-  padLength: number
-  colors:Map<string, number>
-  delays:Map<string,number>
-  botPrefix:string
+  public static padLength: number = 14
+  public static botPrefix:string = "."
 
-  constructor(){
-    this.padLength = 14
-    this.botPrefix = "."
-    this.colors = new Map<string, number>()
-    this.colors.set("theme", 0x00FF00)
-    this.colors.set("tej", 0xEB1D89)
+  public static colors:Map<string, number> = new Map([
+    ["theme",0x00FF00],
+    ["tej", 0xEB1D89]
+  ])
 
-    this.delays = new Map<string, number>()
-    this.delays.set("short", 2000)
-    this.delays.set("medium", 4000)
-  }
+  public static delays:Map<string,number> = new Map([
+    ["short", 2000],
+    ["medium", 4000]
+  ])
 
-  public shuffle(array){
+  //Everybody do the knuth shuffle
+  public static shuffle(array){
     var currentIndex = array.length, temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
@@ -47,25 +44,24 @@ export class Utils{
     return array;
   }
     
-  public code(string){
+  public static code(string){
     return "```" + string + "```"
   } 
 
-  public bold(string){
+  public static bold(string){
     return "**" + string + "**"
   }
 
   // right padding s with c to a total of n chars taken from 
   //https://eureka.ykyuen.info/2011/08/23/javascript-leftright-pad-a-string/
-  public pad_r(s, c) {
-  if (! s || ! c || s.length >= this.padLength) {
+  public static pad_r(s, c) {
+  if (! s || ! c || s.length >= Utils.padLength) {
     return s;
   }
-  var max = (this.padLength - s.length)/c.length;
+  var max = (Utils.padLength - s.length)/c.length;
   for (var i = 0; i < max; i++) {
     s += c;
   }
     return s;
   }
-
 }

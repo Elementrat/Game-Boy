@@ -14,16 +14,9 @@ var ResponseCode;
 })(ResponseCode = exports.ResponseCode || (exports.ResponseCode = {}));
 var Utils = (function () {
     function Utils() {
-        this.padLength = 14;
-        this.botPrefix = ".";
-        this.colors = new Map();
-        this.colors.set("theme", 0x00FF00);
-        this.colors.set("tej", 0xEB1D89);
-        this.delays = new Map();
-        this.delays.set("short", 2000);
-        this.delays.set("medium", 4000);
     }
-    Utils.prototype.shuffle = function (array) {
+    //Everybody do the knuth shuffle
+    Utils.shuffle = function (array) {
         var currentIndex = array.length, temporaryValue, randomIndex;
         // While there remain elements to shuffle...
         while (0 !== currentIndex) {
@@ -37,19 +30,19 @@ var Utils = (function () {
         }
         return array;
     };
-    Utils.prototype.code = function (string) {
+    Utils.code = function (string) {
         return "```" + string + "```";
     };
-    Utils.prototype.bold = function (string) {
+    Utils.bold = function (string) {
         return "**" + string + "**";
     };
     // right padding s with c to a total of n chars taken from 
     //https://eureka.ykyuen.info/2011/08/23/javascript-leftright-pad-a-string/
-    Utils.prototype.pad_r = function (s, c) {
-        if (!s || !c || s.length >= this.padLength) {
+    Utils.pad_r = function (s, c) {
+        if (!s || !c || s.length >= Utils.padLength) {
             return s;
         }
-        var max = (this.padLength - s.length) / c.length;
+        var max = (Utils.padLength - s.length) / c.length;
         for (var i = 0; i < max; i++) {
             s += c;
         }
@@ -57,4 +50,14 @@ var Utils = (function () {
     };
     return Utils;
 }());
+Utils.padLength = 14;
+Utils.botPrefix = ".";
+Utils.colors = new Map([
+    ["theme", 0x00FF00],
+    ["tej", 0xEB1D89]
+]);
+Utils.delays = new Map([
+    ["short", 2000],
+    ["medium", 4000]
+]);
 exports.Utils = Utils;

@@ -71,7 +71,7 @@ export class DBManager{
 
     getLeaderboard(gameName, callback) {
         var result = "";
-        var e = new Discord.RichEmbed({ color: utils.colors.get("theme") });
+        var e = new Discord.RichEmbed({ color: Utils.colors.get("theme") });
         this.db.all("SELECT username, score FROM " + gameName + " ORDER BY score DESC", [], function (err, rows) {
             if (err) {
                 console.log(err);

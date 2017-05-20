@@ -1,17 +1,17 @@
 # Game-Boy
 A Discord Boy
 
-To get set up,
+To get set up
 * Install Node
 * Open the repo
 * "npm install"
 * "npm install nodemon -g"
 * "npm install typescript -g"
 
-Then, to dev with auto-compile on code-change
-* tsc --lib es6 --outDir build .\server.ts -w
+Then, to dev (with auto-compile on code-changes)
+* tsc --lib es6 --outDir ../build .\server.ts -w
 
-Then, to serve (with auto-update when code changes)
+Then, to serve (with auto-update on code changes)
 * cd into /build 
 * "nodemon ./server.js -w"
 

@@ -2,7 +2,6 @@
 exports.__esModule = true;
 var Discord = require("discord.js");
 var utils_1 = require("./utils");
-var utils = new utils_1.Utils();
 var Root = (function () {
     function Root() {
         this.name = "Default";
@@ -20,13 +19,13 @@ var GameManager = (function () {
     function GameManager() {
         this.gameTemplates = new Map();
         //console.log(s)
-        //this.gameTemplates.set("Red-Card", new RedFlagsTemplate())
-        this.gameTemplates.set("tej", new tej_1.TejTemplate());
+        this.gameTemplates.set("red-flags", new game_redflags_1.RedFlagsTemplate());
+        this.gameTemplates.set("tej", new game_tej_1.TejTemplate());
         // this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
         this.gameInstances = new Map();
     }
     GameManager.prototype.describeGames = function () {
-        var e = new Discord.RichEmbed({ color: utils.colors.get("theme") });
+        var e = new Discord.RichEmbed({ color: utils_1.Utils.colors.get("theme") });
         if (this.gameTemplates.size == 0) {
             e.addField("I don't know how to play anything", "I'm sorry. I feel like a failure");
         }
@@ -123,4 +122,5 @@ var GameInstance = (function () {
     return GameInstance;
 }());
 exports.GameInstance = GameInstance;
-var tej_1 = require("./tej");
+var game_redflags_1 = require("./game_redflags");
+var game_tej_1 = require("./game_tej");

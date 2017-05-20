@@ -1,8 +1,6 @@
 import Discord = require('discord.js');
 import { Utils, ResponseCode } from "./utils"
 
-var utils = new Utils()
-
 export class Root{
     name:string
     constructor(){
@@ -23,14 +21,14 @@ export class GameManager {
         this.gameTemplates = new Map<String, GameTemplate>()
         //console.log(s)
 
-        //this.gameTemplates.set("Red-Card", new RedFlagsTemplate())
+        this.gameTemplates.set("red-flags", new RedFlagsTemplate())
         this.gameTemplates.set("tej", new TejTemplate())
        // this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
         this.gameInstances = new Map<Discord.Channel,GameInstance>()
     }
 
     public describeGames(): Discord.RichEmbed {
-        var e = new Discord.RichEmbed({color : utils.colors.get("theme")})
+        var e = new Discord.RichEmbed({color : Utils.colors.get("theme")})
 
         if(this.gameTemplates.size == 0){
             e.addField("I don't know how to play anything", "I'm sorry. I feel like a failure")
@@ -161,5 +159,5 @@ export class GameInstance {
     }
 }
 
-import {RedFlagsInstance, RedFlagsTemplate} from "./redflags"
-import {TejInstance, TejTemplate} from "./tej"
+import {RedFlagsInstance, RedFlagsTemplate} from "./game_redflags"
+import {TejInstance, TejTemplate} from "./game_tej"

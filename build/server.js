@@ -3,7 +3,7 @@ exports.__esModule = true;
 var Discord = require("discord.js");
 var utils_1 = require("./utils");
 var games_1 = require("./games");
-var leaderboard_1 = require("./leaderboard");
+var stats_1 = require("./stats");
 var db_1 = require("./db");
 var secrets_1 = require("./secrets");
 var thugs = new Map();
@@ -11,12 +11,11 @@ thugs.set("tej", "192841484939165696");
 thugs.set("gameboy", "313847241557409792");
 thugs.set("haxo", "178326606283145217");
 var client = new Discord.Client();
-var utils = new utils_1.Utils();
 var botPrefix = ".";
 var Server = (function () {
     function Server() {
         this.gameManager = new games_1.GameManager();
-        this.leaderboardManager = new leaderboard_1.LeaderboardManager();
+        this.leaderboardManager = new stats_1.LeaderboardManager();
     }
     return Server;
 }());
@@ -43,7 +42,7 @@ var saveTejQuote = function (inputSequence, message, author, truthiness) {
 };
 var commands = {
     leaderboard: function (inputSequence, message, author, channel) {
-        channel.send(utils.code(me.leaderboardManager.describeScoreboard()));
+        channel.send(utils_1.Utils.code(me.leaderboardManager.describeScoreboard()));
     },
     realtej: function (inputSequence, message, author, channel) {
         saveTejQuote(inputSequence, message, author, true);
@@ -87,13 +86,20 @@ var commands = {
             message.channel.send("You'll need to start a game before you can end it. ;)");
         }
     },
+    start: function (inputSequence, message, author, channel) {
+        var game = me.gameManager.gameInChannel(channel);
+        if (game) {
+            var status = me.gameManager.startGame(channel);
+            //if(status == ResponseCode.SUCCESS
+        }
+    },
     join: function (inputSequence, message, author, channel) {
         var game = me.gameManager.gameInChannel(channel);
         if (game) {
             var result = me.gameManager.startGame(channel);
             if (result == utils_1.ResponseCode.SUCCESS) {
                 var str = "Started Game. Here are the rules. \n";
-                str += utils.code(game.gameTemplate.rules);
+                str += utils_1.Utils.code(game.gameTemplate.rules);
                 channel.send(str);
             }
             if (result == utils_1.ResponseCode.ERR_NOT_ENOUGH_PLAYERS) {
@@ -119,19 +125,25 @@ client.on('message', function (message) {
     }
     if (author.id == thugs.get("tej")) {
         var tejMoj = message.guild.emojis.array();
+        //var hunned = "💯"
         tejMoj = tejMoj.filter(function (emoj) {
             return emoj.name == 'tej';
         });
         //the tej react exists on this server
         if (tejMoj.length != 0) {
             var tejReact = tejMoj[0];
-            message.react(tejReact);
+            //Give it the tej react based on a 1/10 chance
+            var rand = Math.random();
+            console.log(rand);
+            if (rand < .1) {
+                message.react(tejReact);
+            }
         }
     }
     for (var _i = 0, _a = mentions.users.array(); _i < _a.length; _i++) {
         var mention = _a[_i];
         //THIS MESSAGE MENTIONS TEJ
-        if (mention.username == "192841484939165696") {
+        if (mention.id == thugs.get("tej")) {
         }
     }
     if (!content.startsWith(botPrefix)) {
