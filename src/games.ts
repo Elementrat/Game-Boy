@@ -2,7 +2,7 @@ import Discord = require('discord.js');
 import { Utils, ResponseCode } from "./utils"
 
 export class Root{
-    name:string
+    name : string
     constructor(){
         this.name = "Default"
     }
@@ -14,17 +14,12 @@ export class Role {
 }
 
 export class GameManager {
-    gameTemplates: Map<String, GameTemplate>
-    gameInstances : Map<Discord.Channel, GameInstance>
+    gameTemplates : Map<String, GameTemplate> = new Map<String, GameTemplate>()
+    gameInstances : Map<Discord.Channel, GameInstance> = new Map<Discord.Channel,GameInstance>()
 
     constructor() {
-        this.gameTemplates = new Map<String, GameTemplate>()
-        //console.log(s)
-
         this.gameTemplates.set("red-flags", new RedFlagsTemplate())
         this.gameTemplates.set("tej", new TejTemplate())
-       // this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
-        this.gameInstances = new Map<Discord.Channel,GameInstance>()
     }
 
     public describeGames(): Discord.RichEmbed {
@@ -113,12 +108,12 @@ export class GameTemplate {
     public description: string
     public minPlayers : number
     public rules : string
-    public roles : Array<Role>
+    public roles : Array<Role> = new Array<Role>()
     public requiresExplicitJoin :boolean
     public requiresVoice :boolean
 
     public constructor(){
-        this.roles = new Array<Role>();
+
     }
 
     public create(channel) : GameInstance{
@@ -127,12 +122,12 @@ export class GameTemplate {
 }
 
 export class GameInstance {
-    public players: Array<Discord.User>
+    public players: Array<Discord.User> = new Array<Discord.User>()
     public channel: any
     public currentRound : number
     public numRounds: number
     public gameTemplate: GameTemplate
-    public started : boolean
+    public started : boolean = false
     
     start() {
         this.started = true
@@ -154,11 +149,9 @@ export class GameInstance {
 
     constructor(template : GameTemplate, channel) {
         this.gameTemplate = template;
-        this.started = false
-        this.players = new Array<Discord.User>()
         this.channel = channel
     }
 }
 
-import {RedFlagsInstance, RedFlagsTemplate} from "./game_redflags"
-import {TejInstance, TejTemplate} from "./game_tej"
+import { RedFlagsInstance, RedFlagsTemplate } from "./game_redflags"
+import { TejInstance, TejTemplate } from "./game_tej"

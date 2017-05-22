@@ -18,11 +18,9 @@ exports.Role = Role;
 var GameManager = (function () {
     function GameManager() {
         this.gameTemplates = new Map();
-        //console.log(s)
+        this.gameInstances = new Map();
         this.gameTemplates.set("red-flags", new game_redflags_1.RedFlagsTemplate());
         this.gameTemplates.set("tej", new game_tej_1.TejTemplate());
-        // this.gameTemplates.set("Cards-Against", new CardsAgainstTemplate())
-        this.gameInstances = new Map();
     }
     GameManager.prototype.describeGames = function () {
         var e = new Discord.RichEmbed({ color: utils_1.Utils.colors.get("theme") });
@@ -101,9 +99,9 @@ var GameTemplate = (function () {
 exports.GameTemplate = GameTemplate;
 var GameInstance = (function () {
     function GameInstance(template, channel) {
-        this.gameTemplate = template;
-        this.started = false;
         this.players = new Array();
+        this.started = false;
+        this.gameTemplate = template;
         this.channel = channel;
     }
     GameInstance.prototype.start = function () {

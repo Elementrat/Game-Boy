@@ -9,28 +9,20 @@ import { Secrets } from "./secrets"
 
 const client = new Discord.Client();
 
-var botPrefix = "."
-
 class Server {
-  leaderboardManager: LeaderboardManager
-  gameManager: GameManager
-  tejHandler : TejHandler
-  constructor() {
-    this.gameManager = new GameManager()
-    this.leaderboardManager = new LeaderboardManager()
-    this.tejHandler = new TejHandler()
-  }
+  leaderboardManager:LeaderboardManager = new LeaderboardManager()
+  gameManager: GameManager = new GameManager()
+  tejHandler : TejHandler = new TejHandler()
+  db:DBManager = new DBManager()
 }
 
 let me = new Server();
-let db = new DBManager()
 
 client.on('ready', () => {
-  console.log('I am ready and listening!');
+  console.log('Ready and listening!');
 });
 
 let saveTejQuote = function(inputSequence, message : Discord.Message, author : Discord.User, truthiness){
-  console.log('try 2 sav')
   var cmd = truthiness ? ".realtej " : ".faketej "
 
   if(!inputSequence[1]){
@@ -40,7 +32,7 @@ let saveTejQuote = function(inputSequence, message : Discord.Message, author : D
 
   let quoteText = message.content.replace(cmd, "")
 
-  db.saveTejQuote(quoteText, author.username, truthiness, function(status, results){
+  me.db.saveTejQuote(quoteText, author.username, truthiness, function(status, results){
     if(status == DBResponseCode.ERR){
       author.send("Sorry, had an issue saving that one. I have memory problems. And hearing problems. And just a lot of problems. Blame Haxo.")
       return
@@ -62,7 +54,7 @@ let commands = {
   },
 
   faketej: function(inputSequence, message : Discord.Message, author : Discord.User, channel){
-    saveTejQuote(inputSequence, message, author, false)
+      saveTejQuote(inputSequence, message, author, false)
   },
 
   play : function(inputSequence, message : Discord.Message, author : Discord.User, channel){
@@ -138,34 +130,30 @@ let commands = {
 
 
 client.on('message', message => {
+
+  if (!message.content.startsWith(Utils.botPrefix))
+    return;
+  
   let str = ""
 
   let channel = message.channel
   let author = message.author
   let mentions = message.mentions
-  var content = message.content
+  let content = message.content.replace(Utils.botPrefix, "")
 
-  me.tejHandler.onMessage(inputSequence, message, channel, author)
-
-  if (!content.startsWith(botPrefix)) {
-    return;
-  }
-
-  content = content.replace(botPrefix, "")
-
-  var g = me.gameManager.gameInChannel(message.channel);
-
-  if(g){
-      g.onPublicMessage(inputSequence, message, channel, author)
-  }
-  
-  var inputSequence = content.split(" ").filter(function (elm) {
+  let inputSequence = content.split(" ").filter(function (elm) {
     return elm != " "
   })
 
-  if(commands[inputSequence[0]]){
+  me.tejHandler.onMessage(inputSequence, message, channel, author)
+
+  var g = me.gameManager.gameInChannel(message.channel);
+
+  if (g)
+      g.onPublicMessage(inputSequence, message, channel, author)
+  
+  if (commands[inputSequence[0]])
     commands[inputSequence[0]](inputSequence, message, author, channel)
-  }
   
 });
 

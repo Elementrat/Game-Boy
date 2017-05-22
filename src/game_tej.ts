@@ -4,7 +4,7 @@ import { DBManager , DBResponseCode} from "./db"
 import Discord = require("discord.js")
 
 export class TejQuote{
-    real:number // Number because SQLIte uses 0/1 Numbers as Bools
+    real:number // Number because SQLite uses 0/1 Numbers as bools
     author:string
     quote:string
 }
