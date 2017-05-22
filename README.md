@@ -1,5 +1,5 @@
 # Game-Boy
-A Discord Boy
+## A Discord Boy
 
 To get set up
 * Install Node
