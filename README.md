@@ -9,6 +9,7 @@ To get set up
 * "npm install typescript -g"
 
 Then, to dev (with auto-compile on code-changes)
+* cd into /src
 * tsc --lib es6 --outDir ../build .\server.ts -w
 
 Then, to serve (with auto-update on code changes)

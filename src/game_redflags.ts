@@ -99,9 +99,7 @@ export class RedFlagsTemplate extends GameTemplate{
      }
 
         create (channel) {
-            var inst = new RedFlagsInstance(this);
-            inst.channel = channel;
-            return inst;
+            return new RedFlagsInstance(this, channel);
         }
 }
 
@@ -130,8 +128,8 @@ export class RedFlagsInstance extends GameInstance{
 
     public neighbors:Map<Discord.User,Discord.User>
 
-    constructor(template){
-        super(template)
+    constructor(template, channel){
+        super(template, channel)
         this.gameState = RedFlagState.PREGAME
     }
 

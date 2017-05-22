@@ -100,10 +100,11 @@ var GameTemplate = (function () {
 }());
 exports.GameTemplate = GameTemplate;
 var GameInstance = (function () {
-    function GameInstance(template) {
+    function GameInstance(template, channel) {
         this.gameTemplate = template;
         this.started = false;
         this.players = new Array();
+        this.channel = channel;
     }
     GameInstance.prototype.start = function () {
         this.started = true;

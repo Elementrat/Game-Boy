@@ -152,10 +152,11 @@ export class GameInstance {
         }
     }
 
-    constructor(template : GameTemplate) {
+    constructor(template : GameTemplate, channel) {
         this.gameTemplate = template;
         this.started = false
         this.players = new Array<Discord.User>()
+        this.channel = channel
     }
 }
 

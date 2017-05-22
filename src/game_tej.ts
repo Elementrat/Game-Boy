@@ -23,9 +23,7 @@ export class TejTemplate extends GameTemplate{
     }
 
     create(channel){
-        var inst = new TejInstance(this);
-        inst.channel = channel;
-        inst.initialSetup();
+        var inst = new TejInstance(this,channel);
         return inst;
     }
 }
@@ -46,11 +44,12 @@ export class TejInstance extends GameInstance{
     public tejState : TejState
     public quoteMsg:Discord.Message
 
-    constructor(gameTemplate){
-        super(gameTemplate)
+    constructor(gameTemplate,channel){
+        super(gameTemplate, channel)
         this.dbManager = new DBManager()
         this.tejState = TejState.OMG_PREGAME
         this.currentRound = 0;
+        this.initialSetup();
     }
 
     public initialSetup(){

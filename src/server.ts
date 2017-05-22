@@ -3,14 +3,9 @@ import { Utils, ResponseCode } from "./utils";
 import { GameTemplate, GameManager, GameInstance} from "./games"
 import { LeaderboardManager, Scoreboard } from "./stats"
 import { DBManager, DBResponseCode } from "./db"
+import { TejHandler } from "./tejhandler"
 
 import { Secrets } from "./secrets"
-
-let thugs = new Map<string, string>()
-
-thugs.set("tej", "192841484939165696")
-thugs.set("gameboy","313847241557409792")
-thugs.set("haxo", "178326606283145217")
 
 const client = new Discord.Client();
 
@@ -19,9 +14,11 @@ var botPrefix = "."
 class Server {
   leaderboardManager: LeaderboardManager
   gameManager: GameManager
+  tejHandler : TejHandler
   constructor() {
     this.gameManager = new GameManager()
     this.leaderboardManager = new LeaderboardManager()
+    this.tejHandler = new TejHandler()
   }
 }
 
@@ -31,7 +28,6 @@ let db = new DBManager()
 client.on('ready', () => {
   console.log('I am ready and listening!');
 });
-
 
 let saveTejQuote = function(inputSequence, message : Discord.Message, author : Discord.User, truthiness){
   console.log('try 2 sav')
@@ -149,43 +145,7 @@ client.on('message', message => {
   let mentions = message.mentions
   var content = message.content
 
-  if(author.id == thugs.get("gameboy"))
-    return
-  
-  if(author.id == thugs.get("haxo")){
-
-  }
-
-  if(author.id == thugs.get("tej")){
-
-    var tejMoj = message.guild.emojis.array()
-    //var hunned = "💯"
-
-    tejMoj = tejMoj.filter(function(emoj){
-      return emoj.name == 'tej'
-    })
-
-    //the tej react exists on this server
-    if(tejMoj.length != 0){
-      var tejReact = tejMoj[0]
-
-      //Give it the tej react based on a 1/10 chance
-      var rand = Math.random();
-      
-      console.log(rand)
-      if (rand < .1){
-        message.react(tejReact)
-      }
-    }
-  }
-
-  for (var mention of mentions.users.array()){
-
-    //THIS MESSAGE MENTIONS TEJ
-    if(mention.id == thugs.get("tej")){
-
-    }
-  }
+  me.tejHandler.onMessage(inputSequence, message, channel, author)
 
   if (!content.startsWith(botPrefix)) {
     return;

@@ -5,17 +5,15 @@ var utils_1 = require("./utils");
 var games_1 = require("./games");
 var stats_1 = require("./stats");
 var db_1 = require("./db");
+var tejhandler_1 = require("./tejhandler");
 var secrets_1 = require("./secrets");
-var thugs = new Map();
-thugs.set("tej", "192841484939165696");
-thugs.set("gameboy", "313847241557409792");
-thugs.set("haxo", "178326606283145217");
 var client = new Discord.Client();
 var botPrefix = ".";
 var Server = (function () {
     function Server() {
         this.gameManager = new games_1.GameManager();
         this.leaderboardManager = new stats_1.LeaderboardManager();
+        this.tejHandler = new tejhandler_1.TejHandler();
     }
     return Server;
 }());
@@ -119,33 +117,7 @@ client.on('message', function (message) {
     var author = message.author;
     var mentions = message.mentions;
     var content = message.content;
-    if (author.id == thugs.get("gameboy"))
-        return;
-    if (author.id == thugs.get("haxo")) {
-    }
-    if (author.id == thugs.get("tej")) {
-        var tejMoj = message.guild.emojis.array();
-        //var hunned = "💯"
-        tejMoj = tejMoj.filter(function (emoj) {
-            return emoj.name == 'tej';
-        });
-        //the tej react exists on this server
-        if (tejMoj.length != 0) {
-            var tejReact = tejMoj[0];
-            //Give it the tej react based on a 1/10 chance
-            var rand = Math.random();
-            console.log(rand);
-            if (rand < .1) {
-                message.react(tejReact);
-            }
-        }
-    }
-    for (var _i = 0, _a = mentions.users.array(); _i < _a.length; _i++) {
-        var mention = _a[_i];
-        //THIS MESSAGE MENTIONS TEJ
-        if (mention.id == thugs.get("tej")) {
-        }
-    }
+    me.tejHandler.onMessage(inputSequence, message, channel, author);
     if (!content.startsWith(botPrefix)) {
         return;
     }
