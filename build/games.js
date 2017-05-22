@@ -2,13 +2,7 @@
 exports.__esModule = true;
 var Discord = require("discord.js");
 var utils_1 = require("./utils");
-var Root = (function () {
-    function Root() {
-        this.name = "Default";
-    }
-    return Root;
-}());
-exports.Root = Root;
+var stats_1 = require("./stats");
 var Role = (function () {
     function Role() {
     }
@@ -91,6 +85,9 @@ var GameTemplate = (function () {
     function GameTemplate() {
         this.roles = new Array();
     }
+    GameTemplate.prototype.createInstance = function (c) {
+        return new c();
+    };
     GameTemplate.prototype.create = function (channel) {
         return null;
     };
@@ -101,13 +98,19 @@ var GameInstance = (function () {
     function GameInstance(template, channel) {
         this.players = new Array();
         this.started = false;
+        this.scoreBoard = new stats_1.Scoreboard();
         this.gameTemplate = template;
         this.channel = channel;
+        this.initialSetup();
     }
     GameInstance.prototype.start = function () {
         this.started = true;
     };
     GameInstance.prototype.onPublicMessage = function (inputSequence, message, channel, author) {
+    };
+    GameInstance.prototype.onDM = function (inputSequence, message, channel, author) {
+    };
+    GameInstance.prototype.initialSetup = function () {
     };
     GameInstance.prototype.join = function (user) {
         if (this.players.indexOf(user) == -1) {

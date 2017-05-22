@@ -3,11 +3,7 @@ import Discord = require("discord.js")
 
 export class Scoreboard{
     gameName:string
-    scores:Map<Discord.User, number>
-
-    constructor(){
-        this.scores = new Map<Discord.User, number>()
-    }
+    scores:Map<Discord.User, number> = new Map<Discord.User, number>()
 }
 
 export class LeaderboardManager{

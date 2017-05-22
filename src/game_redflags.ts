@@ -104,7 +104,7 @@ export class RedFlagsTemplate extends GameTemplate{
 }
 
 export class RedFlagsInstance extends GameInstance{
-    public gameState:RedFlagState
+    public gameState:RedFlagState = RedFlagState.PREGAME
     public gameTemplate:RedFlagsTemplate
 
     public redFlagDeck:Array<string>
@@ -122,22 +122,15 @@ export class RedFlagsInstance extends GameInstance{
     public hands:Map<Discord.User,Array<string>>
     public flagHands:Map<Discord.User, Array<string>>
 
-    public scoreBoard:Scoreboard
-
     public currentDateRevealer:Discord.User
 
     public neighbors:Map<Discord.User,Discord.User>
 
-    constructor(template, channel){
-        super(template, channel)
-        this.gameState = RedFlagState.PREGAME
-    }
-
-    initialSetup(){
+    constructor(template,channel){
+        super(template,channel)
         this.redFlagDeck = Utils.shuffle(this.gameTemplate.redFlags.slice());
         this.perkDeck = Utils.shuffle(this.gameTemplate.perks.slice());
         this.players = Utils.shuffle(this.players);
-        this.scoreBoard = new Scoreboard()
         this.singlePointer = 0;
         this.revealerPointer = 0;
         this.currentRound = 0;
@@ -177,8 +170,6 @@ export class RedFlagsInstance extends GameInstance{
         
         if (indexOne == indexTwo)
             return RedFlagResponseCode.ERR_SAME_PICKS;
-
-        //TODO CHANGE THIS TO TEMPLATE VALUE
         var handSize = this.gameTemplate.perkHandSize;
 
         if (indexOne < 0 || indexTwo < 0 || indexOne >= handSize || indexTwo >= handSize)
@@ -359,14 +350,9 @@ export class RedFlagsInstance extends GameInstance{
         }
     };
 
-    onDM(message, DMChannel, author) {
+    onDM(sequence, message, DMChannel, author) {
         var content = message.content;
-        var sequence = message.content.split(" ").filter(function (elm) {
-            return elm != " ";
-        });
-        if (!content.startsWith(Utils.botPrefix))
-            return;
-        content = content.replace(Utils.botPrefix, "");
+
         var me = this;
         switch (this.gameState) {
             case RedFlagState.REVEALINGREDFLAGS:

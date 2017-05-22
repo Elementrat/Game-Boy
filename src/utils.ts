@@ -11,7 +11,7 @@ export enum ResponseCode{
 }
 
 export class Utils{
-  public static padLength: number = 14
+  public static padLength:number = 14
   public static botPrefix:string = "."
 
   public static colors:Map<string, number> = new Map([

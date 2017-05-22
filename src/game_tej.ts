@@ -10,7 +10,7 @@ export class TejQuote{
 }
 
 export class TejTemplate extends GameTemplate{
-    public quoteDeck:Array<TejQuote>
+    public quoteDeck:Array<TejQuote> = new Array<TejQuote>()
 
     constructor(){
         super()
@@ -19,12 +19,10 @@ export class TejTemplate extends GameTemplate{
          this.requiresExplicitJoin = false;
          this.minPlayers = 0;
          this.requiresVoice = false;
-         this.quoteDeck = new Array<TejQuote>()
     }
 
     create(channel){
-        var inst = new TejInstance(this,channel);
-        return inst;
+      return new TejInstance(this,channel);
     }
 }
 
@@ -36,23 +34,18 @@ export enum TejState{
 
 export class TejInstance extends GameInstance{
 
-    public dbManager:DBManager
+    public dbManager:DBManager = new DBManager()
     public gameState:TejState
     public quoteDeck:Array<TejQuote>
     public currentQuote: TejQuote
     public reacCollector : Discord.ReactionCollector
-    public tejState : TejState
+    public tejState : TejState = TejState.OMG_PREGAME
     public quoteMsg:Discord.Message
 
     constructor(gameTemplate,channel){
         super(gameTemplate, channel)
-        this.dbManager = new DBManager()
-        this.tejState = TejState.OMG_PREGAME
         this.currentRound = 0;
-        this.initialSetup();
-    }
 
-    public initialSetup(){
         var me = this;
         me.drawDeck(function (status, results) {
             if (status != ResponseCode.SUCCESS) {

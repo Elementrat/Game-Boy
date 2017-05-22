@@ -2,9 +2,9 @@ import Discord = require("discord.js")
 
 let thugs = new Map<string, string>()
 
-thugs.set("tej", "192841484939165696")
+thugs.set("tej",     "192841484939165696")
 thugs.set("gameboy", "313847241557409792")
-thugs.set("haxo", "178326606283145217")
+thugs.set("haxo",    "178326606283145217")
 
 export class TejHandler {
     onMessage(inputSequence :Array<string>, message : Discord.Message, channel, author :Discord.User) {

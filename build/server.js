@@ -8,6 +8,7 @@ var db_1 = require("./db");
 var tejhandler_1 = require("./tejhandler");
 var secrets_1 = require("./secrets");
 var client = new Discord.Client();
+client.login(secrets_1.Secrets.botToken);
 var Server = (function () {
     function Server() {
         this.leaderboardManager = new stats_1.LeaderboardManager();
@@ -21,21 +22,6 @@ var me = new Server();
 client.on('ready', function () {
     console.log('Ready and listening!');
 });
-var saveTejQuote = function (inputSequence, message, author, truthiness) {
-    var cmd = truthiness ? ".realtej " : ".faketej ";
-    if (!inputSequence[1]) {
-        author.send("I need the quote too! Use the format `" + cmd + "<quote>`");
-        return;
-    }
-    var quoteText = message.content.replace(cmd, "");
-    me.db.saveTejQuote(quoteText, author.username, truthiness, function (status, results) {
-        if (status == db_1.DBResponseCode.ERR) {
-            author.send("Sorry, had an issue saving that one. I have memory problems. And hearing problems. And just a lot of problems. Blame Haxo.");
-            return;
-        }
-        author.send("Successfully saved \"" + quoteText + "\" to the TejDB");
-    });
-};
 var commands = {
     leaderboard: function (inputSequence, message, author, channel) {
         channel.send(utils_1.Utils.code(me.leaderboardManager.describeScoreboard()));
@@ -56,19 +42,21 @@ var commands = {
         }
         else {
             var gameType = inputSequence[1];
-            var result = me.gameManager.create(channel, gameType);
-            if (result == utils_1.ResponseCode.SUCCESS) {
-                var game = me.gameManager.gameInChannel(channel);
-                if (game.gameTemplate.requiresExplicitJoin) {
-                    str = "";
-                    str += "**Alright, let's play " + gameType + "!** \n";
-                    str += "Waiting for players. To join, say `.join` \n";
-                    str += "When everyone is in, say `.start` to begin the game";
-                    channel.send(str);
-                }
-            }
-            if (result == utils_1.ResponseCode.ERR_CHANNEL_ALREADY_HAS_GAME) {
-                channel.send("Sorry, there's already a game running in this channel. Say `.end` to kill it!");
+            switch (me.gameManager.create(channel, gameType)) {
+                case utils_1.ResponseCode.SUCCESS:
+                    var game = me.gameManager.gameInChannel(channel);
+                    if (game.gameTemplate.requiresExplicitJoin) {
+                        me.gameManager.addPlayerToGame(channel, author);
+                        str = "";
+                        str += "**Alright, let's play " + gameType + "!** \n";
+                        str += "Waiting for players. To join, say `.join` \n";
+                        str += "When everyone is in, say `.start` to begin the game";
+                        channel.send(str);
+                    }
+                    break;
+                case utils_1.ResponseCode.ERR_CHANNEL_ALREADY_HAS_GAME:
+                    channel.send("Sorry, there's already a game running in this channel. Say `.end` to kill it!");
+                    break;
             }
         }
     },
@@ -82,26 +70,39 @@ var commands = {
             message.channel.send("You'll need to start a game before you can end it. ;)");
         }
     },
+    join: function (inputSequence, message, author, channel) {
+        var game = me.gameManager.gameInChannel(channel);
+        var str = "";
+        if (game) {
+            var status = me.gameManager.addPlayerToGame(channel, author);
+            switch (status) {
+                case utils_1.ResponseCode.ERR_NOT_ENOUGH_PLAYERS:
+                    str += author.username + " has joined the game";
+                    break;
+                case utils_1.ResponseCode.FAILURE:
+                    str += "Sorry, something went wrong, and I don't know what";
+                    break;
+            }
+        }
+        else {
+            str = "Sorry, you'll need to get a game going in this channel with `.play` before you can join it!";
+        }
+        channel.send(str);
+    },
     start: function (inputSequence, message, author, channel) {
         var game = me.gameManager.gameInChannel(channel);
         if (game) {
-            var status = me.gameManager.startGame(channel);
-            //if(status == ResponseCode.SUCCESS
-        }
-    },
-    join: function (inputSequence, message, author, channel) {
-        var game = me.gameManager.gameInChannel(channel);
-        if (game) {
-            var result = me.gameManager.startGame(channel);
-            if (result == utils_1.ResponseCode.SUCCESS) {
-                var str = "Started Game. Here are the rules. \n";
-                str += utils_1.Utils.code(game.gameTemplate.rules);
-                channel.send(str);
-            }
-            if (result == utils_1.ResponseCode.ERR_NOT_ENOUGH_PLAYERS) {
-                channel.send("Unable to start, the game requires a minimum of " + me.gameManager.gameInChannel(channel).gameTemplate.minPlayers + " players. You can join with `.join`");
-                channel.send("Current roster:");
-                channel.send(me.gameManager.describeRoster(channel));
+            switch (me.gameManager.startGame(channel)) {
+                case utils_1.ResponseCode.SUCCESS:
+                    var str = "Started Game. Here are the rules. \n";
+                    str += utils_1.Utils.code(game.gameTemplate.rules);
+                    channel.send(str);
+                    break;
+                case utils_1.ResponseCode.ERR_NOT_ENOUGH_PLAYERS:
+                    channel.send("Unable to start, the game requires a minimum of " + game.gameTemplate.minPlayers + " players. You can join with `.join`");
+                    channel.send("Current roster:");
+                    channel.send(me.gameManager.describeRoster(channel));
+                    break;
             }
         }
         else {
@@ -122,9 +123,29 @@ client.on('message', function (message) {
     });
     me.tejHandler.onMessage(inputSequence, message, channel, author);
     var g = me.gameManager.gameInChannel(message.channel);
-    if (g)
-        g.onPublicMessage(inputSequence, message, channel, author);
+    if (g) {
+        if (message.type == "dm") {
+            g.onDM(inputSequence, message, channel, author);
+        }
+        else {
+            g.onPublicMessage(inputSequence, message, channel, author);
+        }
+    }
     if (commands[inputSequence[0]])
         commands[inputSequence[0]](inputSequence, message, author, channel);
 });
-client.login(secrets_1.Secrets.botToken);
+var saveTejQuote = function (inputSequence, message, author, truthiness) {
+    var cmd = truthiness ? ".realtej " : ".faketej ";
+    if (!inputSequence[1]) {
+        author.send("I need the quote too! Use the format `" + cmd + "<quote>`");
+        return;
+    }
+    var quoteText = message.content.replace(cmd, "");
+    me.db.saveTejQuote(quoteText, author.username, truthiness, function (status, results) {
+        if (status == db_1.DBResponseCode.ERR) {
+            author.send("Sorry, had an issue saving that one. I have memory problems. And hearing problems. And just a lot of problems. Blame Haxo.");
+            return;
+        }
+        author.send("Successfully saved \"" + quoteText + "\" to the TejDB");
+    });
+};

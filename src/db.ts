@@ -1,25 +1,25 @@
-var sql = require("sqlite3");
-var Discord = require("discord.js");
+let sql = require("sqlite3");
+let Discord = require("discord.js");
 
 import { Utils } from "./utils"
 
-var utils = new Utils();
+let utils = new Utils();
 
-export enum DBResponseCode{
+export enum DBResponseCode {
     SUCCESS,
     ERR
 }
 
-export class DBManager{
-    public db:any
+export class DBManager {
+    public db: any
 
-    constructor(){
+    constructor() {
         this.db = new sql.Database('../data/tejdb.sqlite')
     }
-    public saveTejQuote(quote :string, author : string, realness, callback) {
+    public saveTejQuote(quote: string, author: string, realness, callback) {
         var me = this;
-        
-          this.db.run("CREATE TABLE IF NOT EXISTS tej (quote TEXT PRIMARY KEY UNIQUE, author TEXT, realness INTEGER)", [], function () {
+
+        this.db.run("CREATE TABLE IF NOT EXISTS tej (quote TEXT PRIMARY KEY UNIQUE, author TEXT, realness INTEGER)", [], function () {
             me.db.run("INSERT INTO tej (quote, author, realness) VALUES (?, ?, ?)", quote, author, realness, function (err, rows) {
                 if (err) {
                     console.log(err);
@@ -31,8 +31,8 @@ export class DBManager{
             });
         });
     }
-    
-  public getTejQuotes (callback) {
+
+    public getTejQuotes(callback) {
         var me = this;
         this.db.all("SELECT quote, author, realness from tej", [], function (err, rows) {
             if (err) {
@@ -43,7 +43,7 @@ export class DBManager{
         });
     };
 
-  public saveScores (scoreboard, callback) {
+    public saveScores(scoreboard, callback) {
         var me = this;
         this.db.run("CREATE TABLE IF NOT EXISTS " + scoreboard.gameName + " (id TEXT PRIMARY KEY, username CHAR(50), score NUMBER)", [], function () {
             scoreboard.scores.forEach(function (newlyEarnedScore, user) {
@@ -93,8 +93,6 @@ export class DBManager{
             callback(DBResponseCode.SUCCESS, e);
         });
     };
-
-
 }
 
 

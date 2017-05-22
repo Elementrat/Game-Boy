@@ -1,12 +1,6 @@
 import Discord = require('discord.js');
 import { Utils, ResponseCode } from "./utils"
-
-export class Root{
-    name : string
-    constructor(){
-        this.name = "Default"
-    }
-}
+import { Scoreboard } from "./stats"
 
 export class Role {
     name : string
@@ -61,6 +55,7 @@ export class GameManager {
     public gameInChannel(channel : Discord.Channel) : GameInstance{
         return this.gameInstances.get(channel)
     }
+
     public endGame(channel) : ResponseCode{
         this.gameInstances.delete(channel)
         return ResponseCode.SUCCESS
@@ -112,8 +107,8 @@ export class GameTemplate {
     public requiresExplicitJoin :boolean
     public requiresVoice :boolean
 
-    public constructor(){
-
+    createInstance<A extends GameInstance, channel>(c: new () => A): A {
+        return new c();
     }
 
     public create(channel) : GameInstance{
@@ -128,12 +123,21 @@ export class GameInstance {
     public numRounds: number
     public gameTemplate: GameTemplate
     public started : boolean = false
+    public scoreBoard:Scoreboard = new Scoreboard()
     
     start() {
         this.started = true
     }
 
     onPublicMessage(inputSequence, message, channel, author){
+
+    }
+
+    onDM(inputSequence, message, channel, author){
+
+    }
+
+    initialSetup(){
 
     }
 
@@ -150,6 +154,7 @@ export class GameInstance {
     constructor(template : GameTemplate, channel) {
         this.gameTemplate = template;
         this.channel = channel
+        this.initialSetup();
     }
 }
 
