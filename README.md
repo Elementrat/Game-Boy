@@ -1,5 +1,4 @@
-# Game-Boy
-## A Discord Boy
+# Game-Boy, Discord Boy
 
 To get set up
 * Install Node
@@ -10,7 +9,7 @@ To get set up
 
 Then, to dev (with auto-compile on code-changes)
 * cd into /src
-* tsc --lib es6 --outDir ../build .\server.ts -w
+* "tsc --lib es6 --outDir ../build .\server.ts -w"
 
 Then, to serve (with auto-update on code changes)
 * cd into /build 
